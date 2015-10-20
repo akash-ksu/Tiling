@@ -17,6 +17,9 @@ import com.google.common.base.Preconditions;
 public class Utility {	
 	private static double xDirection = 0.0;
 	private static double yDirection = 0.0;
+	private static List<Rectangle> rectangleList = new ArrayList<>();
+	private static double theta;
+	private static double gamma;
 	
 	// A function to get the intersection of two lines.The equation should be in the form of ax + by = c.
 	public static Point intersectionPoint(LinearEquation firstLine, LinearEquation secondLine){
@@ -81,10 +84,9 @@ public class Utility {
 		Preconditions.checkNotNull(firstPerpendicularPoint, "firstPerpendicularPoint cannot be null");
 		Preconditions.checkNotNull(parallelLine, "parallelLine cannot be null");
 		Preconditions.checkNotNull(polygon, "polygon cannot be null");
-		final List<Rectangle> rectangleList = new ArrayList<Rectangle>();
 		List<Point> rectanglePoints = new ArrayList<Point>();
-		final double theta =  Math.abs(Math.atan(- parallelLine.getxConstant()/parallelLine.getyConstant()));
-		final double gamma = Math.abs(theta - Math.PI/2);
+		theta =  Math.abs(Math.atan(- parallelLine.getxConstant()/parallelLine.getyConstant()));
+		gamma = Math.abs(theta - Math.PI/2);
 		Utility.setDirection(polygon[0], polygon[1]);
 		while(true){
 			Point nextPolygonPoint = Utility.nextPoint(firstPolygonPoint, breadth, theta);
@@ -104,28 +106,87 @@ public class Utility {
 			firstPolygonPoint = nextPolygonPoint;
 			firstPerpendicularPoint = nextPerpendicularPoint;
 		}
-		Utility.setDirection(rectangleList.get(0).getTopLeft(), rectangleList.get(0).getTopRight());
-		do{
-			List<Point> newRectanglePoints = new ArrayList<Point>();
-			for(int i=0; i < rectanglePoints.size()-1; i++){
-				Point firstcorner = Utility.nextPoint(rectanglePoints.get(i), length, gamma);
-				Point secondcorner = Utility.nextPoint(rectanglePoints.get(i+1), length, gamma);
-				if(Utility.contains(polygon, rectanglePoints.get(i)) && Utility.contains(polygon, rectanglePoints.get(i+1)) && Utility.contains(polygon, firstcorner) && Utility.contains(polygon, secondcorner)){
-					Rectangle newRectangle = new Rectangle(rectanglePoints.get(i),rectanglePoints.get(i+1),firstcorner,secondcorner);
-					rectangleList.add(newRectangle);
-					if (!newRectanglePoints.contains(firstcorner)){
-						newRectanglePoints.add(firstcorner);
-					}
-					if (!newRectanglePoints.contains(secondcorner)){
-						newRectanglePoints.add(secondcorner);
-					}
-				}
-			}
-			rectanglePoints.clear();
-			rectanglePoints.addAll(newRectanglePoints);			
-		} while(rectanglePoints.size()>0);	
+//		Utility.setDirection(rectangleList.get(0).getTopLeft(), rectangleList.get(0).getTopRight());
+//		do{
+//			List<Point> newRectanglePoints = new ArrayList<Point>();
+//			for(int i=0; i < rectanglePoints.size()-1; i++){
+//				Point firstcorner = Utility.nextPoint(rectanglePoints.get(i), length, gamma);
+//				Point secondcorner = Utility.nextPoint(rectanglePoints.get(i+1), length, gamma);
+//				if(Utility.contains(polygon, rectanglePoints.get(i)) && Utility.contains(polygon, rectanglePoints.get(i+1)) && Utility.contains(polygon, firstcorner) && Utility.contains(polygon, secondcorner)){
+//					Rectangle newRectangle = new Rectangle(rectanglePoints.get(i),rectanglePoints.get(i+1),firstcorner,secondcorner);
+//					rectangleList.add(newRectangle);
+//					if (!newRectanglePoints.contains(firstcorner)){
+//						newRectanglePoints.add(firstcorner);
+//					}
+//					if (!newRectanglePoints.contains(secondcorner)){
+//						newRectanglePoints.add(secondcorner);
+//					}
+//				}
+//			}
+//			rectanglePoints.clear();
+//			rectanglePoints.addAll(newRectanglePoints);			
+//		} while(rectanglePoints.size()>0);	
+		for(Rectangle rect: rectangleList){
+			getSurrondingRectangles(rect, polygon, length);
+		}
 		return rectangleList;
 	}	
+	
+	// Find all the surrounding valid rectangles around a rectangle
+	public static void getSurrondingRectangles(Rectangle rectangle, Point[] polygon, double length){
+		List<Rectangle> surrondingRectangles = new ArrayList<>();
+		double rectLeftXDir = Math.signum(rectangle.getTopRight().getX() - rectangle.getTopLeft().getX());
+		double rectLeftYDir = Math.signum(rectangle.getTopRight().getY() - rectangle.getTopLeft().getY());
+		Point leftRectTopNew = new Point(rectangle.getTopLeft().getX()+rectLeftXDir*length*Math.cos(gamma),rectangle.getTopLeft().getY()+rectLeftYDir*length*Math.sin(gamma));
+		Point lefRecttBottomNew = new Point(rectangle.getBottomLeft().getX()+rectLeftXDir*length*Math.cos(gamma),rectangle.getBottomLeft().getY()+rectLeftYDir*length*Math.sin(gamma));
+		Rectangle leftRect = new Rectangle(leftRectTopNew, lefRecttBottomNew, rectangle.getTopLeft(), rectangle.getBottomLeft());
+		
+		double rectTopXDir = Math.signum(rectangle.getBottomLeft().getX() - rectangle.getTopLeft().getX());
+		double rectTopYDir = Math.signum(rectangle.getBottomLeft().getY() - rectangle.getTopLeft().getY());
+		Point topRectTopNew = new Point(rectangle.getTopLeft().getX()+rectTopXDir*length*Math.cos(theta),rectangle.getTopLeft().getY()+rectTopYDir*length*Math.sin(theta));
+		Point topRecttRigthNew = new Point(rectangle.getTopRight().getX()+rectTopXDir*length*Math.cos(theta),rectangle.getTopRight().getY()+rectTopYDir*length*Math.sin(theta));
+		Rectangle topRect = new Rectangle(topRectTopNew, rectangle.getTopLeft(), topRecttRigthNew, rectangle.getTopRight());
+		
+		double rectRightXDir = Math.signum(rectangle.getTopLeft().getX() - rectangle.getTopRight().getX());
+		double rectRightYDir = Math.signum(rectangle.getTopLeft().getY() - rectangle.getTopRight().getY());
+		Point rightRectRightNew = new Point(rectangle.getTopRight().getX()+rectRightXDir*length*Math.cos(gamma),rectangle.getTopRight().getY()+rectRightYDir*length*Math.sin(gamma));
+		Point rightRecttBottomNew = new Point(rectangle.getBottomRight().getX()+rectRightXDir*length*Math.cos(gamma),rectangle.getBottomRight().getY()+rectRightYDir*length*Math.sin(gamma));
+		Rectangle rightRect = new Rectangle(rectangle.getTopRight(), rectangle.getBottomRight(), rightRectRightNew, rightRecttBottomNew);
+		
+		double rectDownXDir = Math.signum(rectangle.getTopLeft().getX() - rectangle.getBottomLeft().getX());
+		double rectDownYDir = Math.signum(rectangle.getTopLeft().getY() - rectangle.getBottomLeft().getY());
+		Point downRectLeftNew = new Point(rectangle.getBottomLeft().getX()+rectDownXDir*length*Math.cos(theta),rectangle.getBottomLeft().getY()+rectDownYDir*length*Math.sin(theta));
+		Point downRecttRightNew = new Point(rectangle.getBottomRight().getX()+rectDownXDir*length*Math.cos(theta),rectangle.getBottomRight().getY()+rectDownYDir*length*Math.sin(theta));
+		Rectangle downRect = new Rectangle(rectangle.getBottomLeft(), downRectLeftNew, rectangle.getBottomRight(), downRecttRightNew);
+		
+		if(contains(polygon, leftRect)){
+			if(!rectangleList.contains(leftRect)){
+				rectangleList.add(leftRect);
+				getSurrondingRectangles(leftRect, polygon, length);
+			}
+		}
+		
+		if(contains(polygon, rightRect)){
+			if(!rectangleList.contains(rightRect)){
+				rectangleList.add(rightRect);
+				getSurrondingRectangles(rightRect, polygon, length);
+			}
+		}
+		
+		if(contains(polygon, topRect)){
+			if(!rectangleList.contains(topRect)){
+				rectangleList.add(topRect);
+				getSurrondingRectangles(topRect, polygon, length);
+			}
+		}
+		
+		if(contains(polygon, downRect)){
+			if(!rectangleList.contains(downRect)){
+				rectangleList.add(downRect);
+				getSurrondingRectangles(downRect, polygon, length);
+			}
+		}
+	}
 		
 	// To find the foot of perpendicular 
 	public static Point perpendicularFoot(Point firstPoint, LinearEquation line){
@@ -166,6 +227,14 @@ public class Utility {
 			return sqrt(pow((p2.getX() - p1.getX()), 2) + pow((p2.getY()-p1.getY()), 2));
 		}
 	
+	
+	public static boolean contains(Point[] polygon, Rectangle rect){
+		boolean result = false;
+		if(contains(polygon, rect.getTopLeft()) && contains(polygon, rect.getBottomLeft()) && contains(polygon, rect.getTopRight()) && contains(polygon, rect.getBottomRight())){
+			result = true;
+		}
+		return result;
+	}	
 	// To check if a point lies within the polygon
 	public static boolean contains(Point[] polygon, Point point) {
 		Preconditions.checkNotNull(polygon,"polygon cannot be null");
