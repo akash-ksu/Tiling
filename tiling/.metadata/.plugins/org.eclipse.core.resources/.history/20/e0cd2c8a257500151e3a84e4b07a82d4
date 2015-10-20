@@ -1,0 +1,28 @@
+import java.io.FileReader;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
+public class Tiles {
+
+	
+	public static void main(String args[]){
+		JSONParser parser = new JSONParser();
+		try{
+			Object obj = parser.parse(new FileReader(System.getProperty("user.dir")+"/test_data/data.json"));
+			JSONObject jsonObject = (JSONObject) obj;
+			JSONArray polygon = (JSONArray)jsonObject.get("polygon");
+			JSONArray rectangle = (JSONArray)jsonObject.get("rectangle");
+			
+			
+			
+			System.out.println("ASDA");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		
+		
+	}
+}

@@ -1,0 +1,20 @@
+import java.io.FileReader;
+
+import org.json.simple.parser.JSONParser;
+
+
+public class Tiles {
+
+	
+	public static void main(String args[]){
+		JSONParser parser = new JSONParser();
+		try{
+			Object obj = parser.parse(new FileReader(System.getProperty("user.dir")));
+			System.out.println("Hi");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		
+		
+	}
+}

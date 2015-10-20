@@ -1,0 +1,25 @@
+public class Rectangle{
+	Point topLeft;
+	Point bottomRight;
+	Point topRight;
+	Point bottomLeft;
+	public Point getTopLeft() {
+		return topLeft;
+	}
+	public void setTopLeft(Point topLeft) {
+		this.topLeft = topLeft;
+	}
+	public Point getBottomRight() {
+		return bottomRight;
+	}
+	public void setBottomRight(Point bottomRight) {
+		this.bottomRight = bottomRight;
+	}	
+	Rectangle(Point topLeft, Point bottomLeft, Point topRight,Point bottomRight){
+		this.topLeft = topLeft;
+		this.bottomLeft = bottomLeft;
+		this.topRight = topRight;
+		this.bottomRight = bottomRight;
+	}
+
+}

@@ -1,0 +1,99 @@
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
+/*
+ * This class determines the placements of titles along the first edge of any convex closed polygon 
+ * where n>=3
+ * */
+
+public class TilesPlacement {
+
+	
+	public static void main(String args[]){
+		JSONParser parser = new JSONParser();
+		try{
+			
+			Object obj = parser.parse(new FileReader(System.getProperty("user.dir")+"/test_data/data.json"));
+			JSONObject jsonObject = (JSONObject) obj;
+			JSONArray polygon = (JSONArray)jsonObject.get("polygon");
+			JSONArray rectangle = (JSONArray)jsonObject.get("rectangle");
+			JSONArray firstPointArr = (JSONArray)polygon.get(0);
+			JSONArray secondPointArr = (JSONArray)polygon.get(1);
+			
+			Point[] polygonPoints = new Point[polygon.size()];
+			for(int i=0;i<polygon.size(); i++){
+				polygonPoints[i] = new Point(Double.parseDouble(((JSONArray)polygon.get(i)).get(0).toString()),Double.parseDouble(((JSONArray)polygon.get(i)).get(1).toString()));
+			}
+//			final double fpx = Double.parseDouble(firstPointArr.get(0).toString());
+//			final double fpy = Double.parseDouble(firstPointArr.get(1).toString());
+//			
+//			final double spx = Double.parseDouble(secondPointArr.get(0).toString());
+//			final double spy = Double.parseDouble(secondPointArr.get(1).toString());
+//			
+			final double recLength = Double.parseDouble(rectangle.get(0).toString());
+			final double recBreadth = Double.parseDouble(rectangle.get(1).toString());
+			
+//			final Point firstPoint = new Point(fpx, fpy);
+//			final Point secondPoint = new Point(spx, spy);
+			
+			// Find the length of the first side
+			final double firstLineLength = Utility.distance(polygonPoints[0].getX(), polygonPoints[0].getY(), polygonPoints[1].getX(), polygonPoints[1].getY());
+			
+			// Determine whether to use length or breadth of the rectangle along the first edge
+			/*
+			
+			 * */
+			if(recBreadth> firstLineLength && recLength > firstLineLength){
+				System.out.println("It is not possible to place even 1 tile on the first edge");
+				System.exit(0);
+			}
+			final double breadth = Math.min(recBreadth, recLength);
+			final double length = Math.max(recBreadth, recLength);
+			
+			//Create the equation of the firstLine
+			//LinearEquation firstLineEquation = LinearEquation.create(polygonPoints[0], polygonPoints[1]);
+			List<Rectangle> rectangleList = new ArrayList<Rectangle>();
+			// get correct parallel line
+			final LinearEquation parallelLine = Utility.correctParallelLine(polygonPoints,length);
+			
+			Point firstPerpendicularPoint = Utility.perpendicularFoot(polygonPoints[0], parallelLine);
+				
+			Utility.setDirection(polygonPoints[0], polygonPoints[1]);
+			Point firstPolygonPoint = polygonPoints[0];
+			final double theta =  Math.atan(- parallelLine.getxConstant()/parallelLine.getyConstant());
+			while(true){
+				Point nextPolygonPoint = Utility.nextPoint(firstPolygonPoint, breadth, theta);
+				Point nextPerpendicularPoint = Utility.nextPoint(firstPerpendicularPoint, breadth, theta);
+				
+				if(Utility.contains(polygonPoints, nextPerpendicularPoint) && Utility.contains(polygonPoints, nextPolygonPoint)){
+					Rectangle rectangleCordinates = new Rectangle(firstPolygonPoint,nextPolygonPoint,firstPerpendicularPoint,nextPerpendicularPoint);
+					rectangleList.add(rectangleCordinates);
+				}else{
+					break;
+				}
+				firstPolygonPoint = nextPolygonPoint;
+				firstPerpendicularPoint = nextPerpendicularPoint;
+			}
+			
+			// get the intersection of the parrallel line and the adjacent line
+			
+			// find the first legitimate point on the parallel line
+			
+			LinearEquation testLine = new LinearEquation(3, 4, -12);
+			Point p = new Point(-1.0, -2.0);
+			Point r = Utility.perpendicularFoot(p, testLine);
+			System.out.println(r.x + "," + r.y);
+			System.out.println("ASDA");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		
+		
+	}
+}

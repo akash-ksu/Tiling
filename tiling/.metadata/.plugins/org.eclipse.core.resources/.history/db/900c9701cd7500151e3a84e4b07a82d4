@@ -1,0 +1,134 @@
+import static java.lang.Math.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DecompositionSolver;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+
+
+public class Utility {
+	
+	private static double xDirection = 0.0;
+	private static double yDirection = 0.0;
+
+	// A function to get the intersection of two lines.The equation should be in the form of ax + by = c.
+	public static Point intersectionPoint(LinearEquation firstLine, LinearEquation secondLine){
+		final RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] {{firstLine.getxConstant(),firstLine.getyConstant()},{secondLine.getxConstant(),secondLine.getyConstant()}}, false);
+		final DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
+		
+		final RealVector constants = new ArrayRealVector(new double[]{-firstLine.getConstant(),-secondLine.getConstant()}, false);
+		final RealVector solution = solver.solve(constants);		
+		return new Point(solution.getEntry(0), solution.getEntry(1));
+	}
+	
+	// function to find the line parallel to a given line at a particular distance which intersect the polygon
+	public static LinearEquation correctParallelLine(final Point[] polygon, final double length){
+		final LinearEquation firstLineEquation = new LinearEquation(polygon[0], polygon[1]);
+		final LinearEquation[] parallelLines = findParallelLines(firstLineEquation, length);
+		if(polygon.length>3){			
+			final Point perFoot1 = perpendicularFoot(polygon[0], parallelLines[0]);
+			final Point perFoot2 = perpendicularFoot(polygon[0], parallelLines[1]);
+			if(contains(polygon, perFoot1)){
+				return parallelLines[0];
+			}else if(contains(polygon, perFoot2)){
+				return parallelLines[1];
+			} else {
+				return null;
+			}
+		}else if(polygon.length == 3) {
+			// It is a triangle
+			final LinearEquation adjacentLineThroughFirstPoint = new LinearEquation(polygon[0],polygon[polygon.length-1]);
+			final Point intersectionPoint1 = Utility.intersectionPoint(adjacentLineThroughFirstPoint, parallelLines[0]);
+			final Point intersectionPoint2 = Utility.intersectionPoint(adjacentLineThroughFirstPoint, parallelLines[1]);
+			if(contains(polygon, intersectionPoint1)){
+				return parallelLines[0];
+			}else if(contains(polygon, intersectionPoint2)){
+				return parallelLines[1];
+			} else {
+				return null;
+			}
+		}
+		return null;
+	}
+	
+	// To get new point using parametric form
+	public static Point nextPoint(final Point firstPoint,final double length, final double theta) {
+	 final double x = firstPoint.getX() + xDirection*length*Math.cos(theta);
+	 final double y = firstPoint.getY() + yDirection*length*Math.sin(theta);
+	 return new Point(x,y);
+	}
+	
+	// To set the direction
+	public static void setDirection(final Point firstPoint,final Point secondPoint) {
+		xDirection =  Math.signum(secondPoint.getX()-firstPoint.getX());
+		yDirection =  Math.signum(secondPoint.getY()-firstPoint.getY());
+	}
+	
+	// To get List of Rectangles that can fit inside a polygon
+	public static List<Rectangle> getRectangles(Point firstPolygonPoint, Point firstPerpendicularPoint,final LinearEquation parallelLine, final double breadth, final Point[] polygon) {
+		final List<Rectangle> rectangleList = new ArrayList<Rectangle>();
+		final double theta =  Math.atan(- parallelLine.getxConstant()/parallelLine.getyConstant());
+		Utility.setDirection(polygon[0], polygon[1]);
+		while(true){
+			Point nextPolygonPoint = Utility.nextPoint(firstPolygonPoint, breadth, theta);
+			Point nextPerpendicularPoint = Utility.nextPoint(firstPerpendicularPoint, breadth, theta);		
+			if(Utility.contains(polygon, nextPerpendicularPoint) && Utility.contains(polygon, nextPolygonPoint)){
+				Rectangle rectangleCordinates = new Rectangle(firstPolygonPoint,nextPolygonPoint,firstPerpendicularPoint,nextPerpendicularPoint);
+				rectangleList.add(rectangleCordinates);
+			}else{
+				break;
+			}
+			firstPolygonPoint = nextPolygonPoint;
+			firstPerpendicularPoint = nextPerpendicularPoint;
+		}
+		return rectangleList;
+	}
+	
+		
+	// To find the foot of perpendicular 
+	public static Point perpendicularFoot(Point firstPoint, LinearEquation line){
+		final double p = firstPoint.getX();
+		final double q = firstPoint.getY();
+		final double a = line.getxConstant();
+		final double b = line.getyConstant();
+		final double c = line.getConstant();
+		final double h = p- a*(a*p+b*q+c)/(pow(a, 2) +pow(b, 2));
+		final double k = q - b*(a*p+b*q+c)/(pow(a, 2) +pow(b, 2));
+		return new Point(h, k);
+	}
+	
+	//To find parallel lines at a distance to a given line
+	public static LinearEquation[] findParallelLines(final LinearEquation line, final double length){
+		final LinearEquation[] parallelLines = new LinearEquation[2];
+		final double slope = - line.getxConstant()/line.getyConstant();
+		parallelLines[0] = new LinearEquation(-slope, 1, -line.getConstant()+length*sqrt(pow(slope, 2)+1));
+		parallelLines[1] = new LinearEquation(-slope, 1, -line.getConstant()-length*sqrt(pow(slope, 2)+1));
+		return parallelLines;
+		
+	}
+	
+	// To find the distance between two points
+	public static double distance(final double x1,final double y1,final double x2,final double y2){
+		return sqrt(pow((x2 - x1), 2) + pow((y2-y1), 2));
+	}
+	
+	// To check if a point lies within the polygon
+	public static boolean contains(Point[] polygon, Point point) {
+        int i, j;
+        boolean result = false;
+
+        for(i=0, j = polygon.length - 1; i<polygon.length; j = i++) {
+            if((polygon[i].getY() > point.getY()) != (polygon[j].getY() > point.getY()) &&
+                    (point.getX() < (polygon[j].getX() - polygon[i].getX())*(point.getY() - polygon[i].getY())/(polygon[j].getY()-polygon[i].getY()) + polygon[i].getX())) {
+                result = !result;
+            }
+        }
+
+        return result;
+    }	
+}

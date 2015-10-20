@@ -1,0 +1,22 @@
+import static java.lang.Math.*;
+
+public class Utility {
+
+	
+	// func to find the intersection of two lines
+	
+	// func to find the line parallel to a given line at a particular distance
+	public LinearEquation parallelLine(final LinearEquation firstLineEquation,final double length){
+		LinearEquation correctParallelLine = null;
+		
+		return correctParallelLine;
+	}
+	
+	// find distance between two points
+	public static double distance(final double x1,final double y1,final double x2,final double y2){
+		return sqrt(pow((x2 - x1), 2) + pow((y2-y1), 2));
+	}
+
+	
+	
+}

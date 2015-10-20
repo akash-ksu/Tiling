@@ -1,0 +1,36 @@
+
+public class LinearEquation {
+	double xConstant;
+	double yConstant;
+	double constant;
+	
+	public LinearEquation(double xConstant, double yConstant, double constant){
+		this.xConstant = xConstant;
+		this.yConstant = yConstant;
+		this.constant = constant;
+	}
+
+	public Double getxConstant() {
+		return xConstant;
+	}
+
+	public void setxConstant(Double xConstant) {
+		this.xConstant = xConstant;
+	}
+
+	public Double getyConstant() {
+		return yConstant;
+	}
+
+	public void setyConstant(Double yConstant) {
+		this.yConstant = yConstant;
+	}
+
+	public Double getConstant() {
+		return constant;
+	}
+
+	public void setConstant(Double constant) {
+		this.constant = constant;
+	}
+}

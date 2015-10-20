@@ -1,0 +1,37 @@
+import java.io.FileReader;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
+public class Tiles {
+
+	
+	public static void main(String args[]){
+		JSONParser parser = new JSONParser();
+		try{
+			Object obj = parser.parse(new FileReader(System.getProperty("user.dir")+"/test_data/data.json"));
+			JSONObject jsonObject = (JSONObject) obj;
+			JSONArray polygon = (JSONArray)jsonObject.get("polygon");
+			JSONArray rectangle = (JSONArray)jsonObject.get("rectangle");
+			JSONArray firstPointArr = (JSONArray)polygon.get(0);
+			JSONArray secondPointArr = (JSONArray)polygon.get(1);
+			
+			double fpx = (Double)firstPointArr.get(0);
+			double fpy = (Double)firstPointArr.get(1);
+			
+			double spx = (Double)secondPointArr.get(0);
+			double spy = (Double)secondPointArr.get(1);
+			
+			Point firstPoint = new Point(fpx, fpy);
+			Point secPoint = new Point(spx, spy);
+			
+			System.out.println("ASDA");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		
+		
+	}
+}

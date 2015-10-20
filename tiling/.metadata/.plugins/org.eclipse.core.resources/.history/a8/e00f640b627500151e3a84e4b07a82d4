@@ -1,0 +1,52 @@
+import static java.lang.Math.*;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DecompositionSolver;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+
+
+public class Utility {
+
+	
+	// func to find the intersection of two lines
+	/*
+	 * The equation should be in the form of ax + by = c
+	 * */
+	public Point intersectionPoint(LinearEquation firstLine, LinearEquation secondLine){
+		RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] {{firstLine.getxConstant(),firstLine.getyConstant()},{secondLine.getxConstant(),secondLine.getyConstant()}}, false);
+		DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
+		
+		RealVector constants = new ArrayRealVector(new double[]{-firstLine.getConstant(),-secondLine.getConstant()}, false);
+		RealVector solution = solver.solve(constants);
+		
+		return new Point(solution.getEntry(0), solution.getEntry(1));
+	}
+	
+	// func to find the line parallel to a given line at a particular distance
+	public LinearEquation correctParallelLine(final LinearEquation firstLineEquation,final double length){
+		LinearEquation[] parallelLines = findParallelLines(firstLineEquation, length);
+		LinearEquation otherLine = 
+		
+	}
+	
+	//find parallel lines at a distance to a given line
+	public LinearEquation[] findParallelLines(final LinearEquation line, final double length){
+		LinearEquation[] parallelLines = new LinearEquation[2];
+		final double slope = - line.getxConstant()/line.getyConstant();
+		parallelLines[0] = new LinearEquation(-slope, 1, -line.getConstant()+length*sqrt(pow(slope, 2)+1));
+		parallelLines[1] = new LinearEquation(-slope, 1, -line.getConstant()-length*sqrt(pow(slope, 2)+1));
+		return parallelLines;
+		
+	}
+	
+	// find distance between two points
+	public static double distance(final double x1,final double y1,final double x2,final double y2){
+		return sqrt(pow((x2 - x1), 2) + pow((y2-y1), 2));
+	}
+
+	
+	
+}

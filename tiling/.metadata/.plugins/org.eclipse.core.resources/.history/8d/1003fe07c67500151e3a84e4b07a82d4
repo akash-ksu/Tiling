@@ -1,0 +1,53 @@
+
+/*
+ * The equation is of the form
+ * ax + by + c = 0
+ * */
+
+public class LinearEquation {
+	double xConstant;
+	double yConstant;
+	double constant;
+	
+	public LinearEquation(double xConstant, double yConstant, double constant){
+		this.xConstant = xConstant;
+		this.yConstant = yConstant;
+		this.constant = constant;
+	}
+
+	public Double getxConstant() {
+		return xConstant;
+	}
+
+	public void setxConstant(Double xConstant) {
+		this.xConstant = xConstant;
+	}
+
+	public Double getyConstant() {
+		return yConstant;
+	}
+
+	public void setyConstant(Double yConstant) {
+		this.yConstant = yConstant;
+	}
+
+	public Double getConstant() {
+		return constant;
+	}
+
+	public void setConstant(Double constant) {
+		this.constant = constant;
+	}
+	
+	//create a LinearEquation for two points
+	public static LinearEquation create(Point firstPoint, Point secondPoint){
+		double slope = 0.0f;
+		try{
+		slope = (secondPoint.getY() - firstPoint.getY()) / (secondPoint.getX() - firstPoint.getX());
+		}catch(ArithmeticException e){
+			System.out.println("Divide by 0 while creating linear equation");
+			System.exit(0);
+		}
+		return new LinearEquation(slope, -1, secondPoint.getY() - slope*secondPoint.getX());
+	}
+}
